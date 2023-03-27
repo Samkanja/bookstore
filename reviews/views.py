@@ -3,7 +3,7 @@ from django.shortcuts import render
 # Create your views here.
 
 from .models import Book
-from django.views.generic import ListView
+from django.views.generic import ListView,DetailView
 from .utils import average_rating
 
 
@@ -27,3 +27,18 @@ class BookListView(ListView):
         return context
 
 
+class BookDetailView(DetailView):
+    model = Book
+    template_name  = 'reviews/book_detail.html'
+    context_object_name = 'book'
+
+    def get_context_data(self, **kwargs):
+        context  =  super().get_context_data(**kwargs)
+        reviews = self.object.review_set.all()
+        if reviews:
+            book_rating = average_rating([review.rating for review in reviews])
+        else:
+            book_rating = None
+        context['book_rating'] = book_rating
+        context['reviews'] = reviews
+        return context
